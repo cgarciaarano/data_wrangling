@@ -1,4 +1,4 @@
-# To experiment with this code freely you will have to run this code locally.
+ # To experiment with this code freely you will have to run this code locally.
 # Take a look at the main() function for an example of how to use the code.
 # We have provided example json output in the other code editor tabs for you to
 # look at, but you will not be able to run any queries through our UI.
@@ -62,22 +62,47 @@ def main():
     when was one direction formed
 
     '''
+
+    results = query_by_name(ARTIST_URL, query_type["simple"], "First Aid Kit")
+    print('Number of bands named First Aid Kit: {0}'.format(len([ artistas for artistas in results["artists"] if artistas['name'] == "First Aid Kit"])))
+
+
+    results = query_by_name(ARTIST_URL, query_type["simple"], "Queen")
+    print('begin_area name for Queen: {0}'.format(results["artists"][0]['begin-area']['name']))
+
+    results = query_by_name(ARTIST_URL, query_type["simple"], "Beatles")
+    for alias in results["artists"][0]['aliases']:
+        if alias['locale'] in ('es','ES'):
+            name = alias['name']
+    print('Spanish alias for Beatles: {0}'.format(name))
+
     results = query_by_name(ARTIST_URL, query_type["simple"], "Nirvana")
-    pretty_print(results)
+    print('Nirvana disambiguation: {0}'.format(results["artists"][0]['disambiguation']))
 
-    artist_id = results["artists"][1]["id"]
-    print "\nARTIST:"
-    pretty_print(results["artists"][1])
 
-    artist_data = query_site(ARTIST_URL, query_type["releases"], artist_id)
-    releases = artist_data["releases"]
-    print "\nONE RELEASE:"
-    pretty_print(releases[0], indent=2)
-    release_titles = [r["title"] for r in releases]
 
-    print "\nALL TITLES:"
-    for t in release_titles:
-        print t
+    results = query_by_name(ARTIST_URL, query_type["simple"], "One Direction")
+    print('when was one direction formed: {0}'.format(results["artists"][0]['life-span']['begin']))
+    raw_input()
+
+
+    # Example code
+    # results = query_by_name(ARTIST_URL, query_type["simple"], "Nirvana")
+    # pretty_print(results)
+
+    # artist_id = results["artists"][1]["id"]
+    # print "\nARTIST:"
+    # pretty_print(results["artists"][1])
+
+    # artist_data = query_site(ARTIST_URL, query_type["releases"], artist_id)
+    # releases = artist_data["releases"]
+    # print "\nONE RELEASE:"
+    # pretty_print(releases[0], indent=2)
+    # release_titles = [r["title"] for r in releases]
+
+    # print "\nALL TITLES:"
+    # for t in release_titles:
+    #     print t
 
 
 if __name__ == '__main__':
