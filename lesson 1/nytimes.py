@@ -24,7 +24,7 @@ import requests
 
 URL_MAIN = "http://api.nytimes.com/svc/"
 URL_POPULAR = URL_MAIN + "mostpopular/v2/"
-API_KEY = { "popular": "",
+API_KEY = { "popular": "f2990805afc90173a962136d825fd077:9:73745320",
             "article": ""}
 
 
@@ -38,8 +38,15 @@ def article_overview(kind, period):
     data = get_from_file(kind, period)
     titles = []
     urls =[]
-    # YOUR CODE HERE
 
+    for art in data:
+        d = { art['section'] : art['title']}
+        titles.append(d)
+        for media in art['media']:
+           urls.extend([ meta['url'] for meta in media['media-metadata'] if meta['format'] == "Standard Thumbnail"])
+    # YOUR CODE HERE
+    import pprint
+    pprint.pprint(titles)
     return (titles, urls)
 
 
