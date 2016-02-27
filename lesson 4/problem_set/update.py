@@ -47,6 +47,7 @@ import codecs
 import csv
 import json
 import pprint
+import re
 
 DATAFILE = 'arachnid.csv'
 FIELDS ={'rdf-schema#label': 'label',
@@ -55,20 +56,46 @@ FIELDS ={'rdf-schema#label': 'label',
 
 def add_field(filename, fields):
 
-    process_fields = fields.keys()
-    data = {}
-    with open(filename, "r") as f:
-        reader = csv.DictReader(f)
-        for i in range(3):
-            l = reader.next()
-        # YOUR CODE HERE
+  """
+  - process the csv file and extract 2 fields - 'rdf-schema#label' and 'binomialAuthority_label'
+  - clean up the 'rdf-schema#label' the same way as in the first exercise - removing redundant "(spider)" suffixes
+  - return a dictionary with the cleaned 'rdf-schema#label' field values as keys, 
+    and 'binomialAuthority_label' field values as values
+  - if 'binomialAuthority_label' is "NULL" for a row in the csv, skip the item
+  """
 
-    return data
+  process_fields = fields.keys()
+  data = {}
+  pat_parenth = re.compile('\(.*\)')
+  with open(filename, "r") as f:
+      reader = csv.DictReader(f)
+      for i in range(3):
+          reader.next()
+
+      for line in reader:
+        # trim out redundant description in parenthesis from the 'rdf-schema#label' field, like "(spider)"
+        key = line['rdf-schema#label']
+        key = re.sub(pat_parenth, '', key).strip()
+        
+        if not line['binomialAuthority_label'] == 'NULL':
+          data[key] = line['binomialAuthority_label']
+
+  return data
 
 
 def update_db(data, db):
-    # YOUR CODE HERE
-    pass
+    """
+    - query the 'label' field in the database using rdf-schema#label keys from the data dictionary
+    - update the documents by adding a new item under 'classification' with the key 'binomialAuthority' and the
+    binomialAuthority_label value from the data dictionary as the value
+    """
+    for key in data.keys():
+        result = db.arachnid.update(
+            { 'label': key },
+            {
+                '$set' : {'classification.binomialAuthority' : data[key]}
+            }
+        )
 
 
 def test():
@@ -85,6 +112,7 @@ def test():
     update_db(data, db)
 
     updated = db.arachnid.find_one({'label': 'Opisthoncana'})
+
     assert updated['classification']['binomialAuthority'] == 'Embrik Strand'
     pprint.pprint(data)
 
